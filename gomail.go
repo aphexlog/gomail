@@ -9,8 +9,8 @@ import (
 	gomail "gopkg.in/gomail.v2"
 )
 
-// User type intended to authenticate to SMTP server
-type User struct {
+// Config type intended to authenticate to SMTP server
+type Config struct {
 	Username   string `json:"username"`
 	Password   string `json:"password"` // use a properly hashed password (bcrypt / scrypt)
 	Sender     string `json:"sender"`
@@ -21,7 +21,7 @@ type User struct {
 func main() {
 
 	// open json file
-	jsonFile, err := os.Open("auth.json")
+	jsonFile, err := os.Open("config.json")
 	// if os.Open returns an error then handle it
 	if err != nil {
 		fmt.Println(err)
@@ -32,25 +32,25 @@ func main() {
 	// read our opened jsonFile as a byte array
 	byteValue, _ := ioutil.ReadAll(jsonFile)
 
-	var user User
+	var config Config
 
-	json.Unmarshal(byteValue, &user)
-	fmt.Println("Attempting to send mail from " + user.Sender + "...")
+	json.Unmarshal(byteValue, &config)
+	fmt.Println("Attempting to send mail from " + config.Sender + "...")
 
 	m := gomail.NewMessage()
-	m.SetHeader("From", user.Sender)
-	m.SetHeader("To", user.Recepients)
-	m.SetAddressHeader("Cc", user.CC, "Aaron W. West")
+	m.SetHeader("From", config.Sender)
+	m.SetHeader("To", config.Recepients)
+	m.SetAddressHeader("Cc", config.CC, "Aaron W. West")
 	m.SetHeader("Subject", "Hello dumbdumb!")
 	m.SetBody("text/html", "Hello <b>A-aron</b>")
 
-	d := gomail.NewDialer("smtp.gmail.com", 587, user.Username, user.Password)
+	d := gomail.NewDialer("smtp.gmail.com", 587, config.Username, config.Password)
 
-	fmt.Println("Username: " + user.Username)
-	fmt.Println("Password: " + user.Password)
-	fmt.Println("Sender: " + user.Sender)
-	fmt.Println("Recepients: " + user.Recepients)
-	fmt.Println("CC: " + user.CC)
+	fmt.Println("Username: " + config.Username)
+	fmt.Println("Password: " + config.Password)
+	fmt.Println("Sender: " + config.Sender)
+	fmt.Println("Recepients: " + config.Recepients)
+	fmt.Println("CC: " + config.CC)
 
 	// Send the email to Bob, Cora and Dan.
 	if err := d.DialAndSend(m); err != nil {
